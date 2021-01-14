@@ -7,7 +7,6 @@ anyChar(x:xs) = (x, xs)
 
 main :: IO ()
 main = do
-    let r1 = anyChar "abc"
-    let r2 = anyChar $ snd r1
-    print r1
-    print r2
+    let (x1, xs1) = anyChar "abc"
+    let (x2, xs2) = anyChar xs1
+    print [x1, x2]

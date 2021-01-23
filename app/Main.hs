@@ -1,6 +1,12 @@
 module Main where
 
 import Lib
+import Control.Exception
+
+parseTest p s = do
+    print $ fst $ p s
+    `catch` \(SomeException e) ->
+      putStr $ show e
 
 anyChar(x:xs) = (x, xs)
 
@@ -16,6 +22,8 @@ test2 xs0 =
 
 main :: IO ()
 main = do
-  print $ anyChar "abt"
-  print $ test1 "abt"
-  print $ test2 "abt"
+  parseTest anyChar "abt"
+  parseTest test1 "abt"
+  parseTest test2 "abt"
+  parseTest test2 "ab"
+  parseTest test2 "123"

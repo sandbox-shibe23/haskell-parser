@@ -2,6 +2,7 @@ module Main where
 
 import Lib
 import Control.Exception
+import Data.Char (isDigit)
 
 parseTest p s = do
     print $ fst $ p s
@@ -9,21 +10,11 @@ parseTest p s = do
       putStr $ show e
 
 anyChar(x:xs) = (x, xs)
-
-test1 xs0 =
-  let (x1, xs1) = anyChar xs0
-      (x2, xs2) = anyChar xs1
-  in ([x1, x2], xs2)
-
-test2 xs0 =
-  let (x1, xs1) = test1 xs0
-      (x2, xs2) = anyChar xs1
-  in (x1 ++ [x2], xs2)
+satisfy f (x:xs) | f x = (x, xs)
 
 main :: IO ()
 main = do
-  parseTest anyChar "abt"
-  parseTest test1 "abt"
-  parseTest test2 "abt"
-  parseTest test2 "ab"
-  parseTest test2 "123"
+  parseTest (satisfy (=='a')) "abt"
+  parseTest (satisfy (=='a')) "123"
+  parseTest (satisfy isDigit) "abt"
+  parseTest (satisfy isDigit) "123"

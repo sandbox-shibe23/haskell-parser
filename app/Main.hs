@@ -16,6 +16,16 @@ char c = satisfy (== c)
 digit = satisfy isDigit
 letter = satisfy isLetter
 
+test1 xs0 =
+    let (x1, xs1) = anyChar xs0
+        (x2, xs2) = anyChar xs1
+    in ([x1, x2], xs2)
+
+test2 xs0 =
+    let (x1, xs1) = test1   xs0
+        (x2, xs2) = anyChar xs1
+    in (x1 ++ [x2], xs2)
+
 test3 xs0 =
   let (x1, xs1) = letter xs0
       (x2, xs2) = digit xs1
@@ -24,7 +34,18 @@ test3 xs0 =
 
 main :: IO ()
 main = do
-  parseTest test3 "abc"
-  parseTest test3 "123"
-  parseTest test3 "a23"
-  parseTest test3 "a234"
+    parseTest anyChar "abc"
+    parseTest test1   "abc"
+    parseTest test2   "abc"
+    parseTest test2   "12"      -- NG
+    parseTest test2   "123"
+    parseTest (char 'a') "abc"
+    parseTest (char 'a') "123"  -- NG
+    parseTest digit  "abc"      -- NG
+    parseTest digit  "123"
+    parseTest letter "abc"
+    parseTest letter "123"      -- NG
+    parseTest test3  "abc"      -- NG
+    parseTest test3  "123"      -- NG
+    parseTest test3  "a23"
+    parseTest test3  "a234"

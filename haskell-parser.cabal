@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 886efa93d89c5e4f8395dbcc9b3b1db66e87a0c7730b0c333dab170f02543644
+-- hash: 18078fdddb438d2895a2c93c5cf25832f0cd29b54d799a64a1ae5b5e227b48b6
 
 name:           haskell-parser
 version:        0.1.0.0
@@ -46,6 +46,7 @@ executable haskell-parser-exe
   build-depends:
       base >=4.7 && <5
     , haskell-parser
+    , mtl
   default-language: Haskell2010
 
 test-suite haskell-parser-test

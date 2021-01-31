@@ -21,21 +21,9 @@ char c = satisfy (== c)
 digit = satisfy isDigit
 letter = satisfy isLetter
 
-test1 = do
-  x1 <- anyChar
-  x2 <- anyChar
-  return [x1, x2]
-
-test2 = do
-  x1 <- test1
-  x2 <- anyChar
-  return $ x1 ++ [x2]
-
-test3 = do
-  x1 <- letter
-  x2 <- digit
-  x3 <- digit
-  return [x1, x2, x3]
+test1 = sequence [anyChar, anyChar]
+test2 = (++) <$> test1 <*> sequence [anyChar]
+test3 = sequence [letter, digit, digit]
 
 main :: IO ()
 main = do

@@ -1,33 +1,38 @@
-import Control.Exception
 import Data.Char
 
-parseTest p s = do
-    print $ fst $ p s
-    `catch` \(SomeException e) ->
-        putStr $ show e
+parseTest p s = case p s of
+    Right (r, _) -> print r
+    Left e       -> putStrLn $ "[" ++ show s ++ "]" ++ e
 
-anyChar   (x:xs)       = (x, xs)
-satisfy f (x:xs) | f x = (x, xs)
+anyChar (x:xs) = Right(x, xs)
+anyChar _ = Left "too short"
 
-char c = satisfy (== c)
-digit  = satisfy isDigit
-letter = satisfy isLetter
+satisfy f (x:xs) | not $ f x = Left $ "; " ++ show x
+satisfy f xs = anyChar xs
 
-test1 xs0 =
-    let (x1, xs1) = anyChar xs0
-        (x2, xs2) = anyChar xs1
-    in ([x1, x2], xs2)
+Left a <|> Left b = Left $ b ++ a
+Left _ <|> b      = b
+a      <|> _      = a
 
-test2 xs0 =
-    let (x1, xs1) = test1   xs0
-        (x2, xs2) = anyChar xs1
-    in (x1 ++ [x2], xs2)
+char c xs = satisfy (== c) xs <|> Left ("not char" ++ show c)
+digit  xs = satisfy isDigit xs <|> Left "not digit"
+letter xs = satisfy isLetter xs <|> Left "not letter"
 
-test3 xs0 =
-    let (x1, xs1) = letter xs0
-        (x2, xs2) = digit  xs1
-        (x3, xs3) = digit  xs2
-    in ([x1, x2, x3], xs3)
+test1 xs0 = do
+    (x1, xs1) <- anyChar xs0
+    (x2, xs2) <- anyChar xs1
+    return ([x1, x2], xs2)
+
+test2 xs0 = do
+    (x1, xs1) <- test1 xs0
+    (x2, xs2) <- anyChar xs1
+    return  (x1 ++ [x2], xs2)
+
+test3 xs0 = do
+    (x1, xs1) <- letter xs0
+    (x2, xs2) <- digit  xs1
+    (x3, xs3) <- digit  xs2
+    return ([x1, x2, x3], xs3)
 
 main = do
     parseTest anyChar "abc"

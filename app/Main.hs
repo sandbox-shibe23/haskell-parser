@@ -1,38 +1,35 @@
+import Control.Applicative ((<$>), (<*>))
+import Control.Monad
+import Control.Monad.State
 import Data.Char
 
-parseTest p s = case p s of
-    Right (r, _) -> print r
-    Left e       -> putStrLn $ "[" ++ show s ++ "]" ++ e
+parseTest p s = case evalStateT p s of
+    Right r -> print r
+    Left  e -> putStrLn $ "[" ++ show s ++ "]" ++ e
 
-anyChar (x:xs) = Right(x, xs)
-anyChar _ = Left "too short"
+anyChar = StateT $ anyChar where
+  anyChar (x:xs) = Right(x, xs)
+  anyChar _      = Left "too short"
 
-satisfy f (x:xs) | not $ f x = Left $ "; " ++ show x
-satisfy f xs = anyChar xs
+satisfy f = StateT $ satisfy where
+  satisfy (x:xs) | not $ f x = Left $ "; " ++ show x
+  satisfy xs                 = runStateT anyChar xs
 
-Left a <|> Left b = Left $ b ++ a
-Left _ <|> b      = b
-a      <|> _      = a
+(StateT a) <|> (StateT b) = StateT $ \s ->
+    (a s) <|> (b s) where
+    Left a <|> Left b = Left $ b ++ a
+    Left _ <|> b      = b
+    a      <|> _      = a
 
-char c xs = satisfy (== c) xs <|> Left ("not char" ++ show c)
-digit  xs = satisfy isDigit xs <|> Left "not digit"
-letter xs = satisfy isLetter xs <|> Left "not letter"
+left = lift . Left
 
-test1 xs0 = do
-    (x1, xs1) <- anyChar xs0
-    (x2, xs2) <- anyChar xs1
-    return ([x1, x2], xs2)
+char c = satisfy (== c)   <|> left ("not char" ++ show c)
+digit  = satisfy isDigit  <|> left "not digit"
+letter = satisfy isLetter <|> left "not letter"
 
-test2 xs0 = do
-    (x1, xs1) <- test1 xs0
-    (x2, xs2) <- anyChar xs1
-    return  (x1 ++ [x2], xs2)
-
-test3 xs0 = do
-    (x1, xs1) <- letter xs0
-    (x2, xs2) <- digit  xs1
-    (x3, xs3) <- digit  xs2
-    return ([x1, x2, x3], xs3)
+test1 = sequence [anyChar, anyChar]
+test2 = (++) <$> test1 <*> sequence [anyChar]
+test3 = sequence [letter, digit, digit]
 
 main = do
     parseTest anyChar "abc"

@@ -30,6 +30,7 @@ letter = satisfy isLetter <|> left "not letter"
 test1 = sequence [anyChar, anyChar]
 test2 = (++) <$> test1 <*> sequence [anyChar]
 test3 = sequence [letter, digit, digit]
+test4 = letter <|> digit 
 
 main = do
     parseTest anyChar "abc"
@@ -47,3 +48,6 @@ main = do
     parseTest test3  "123"      -- NG
     parseTest test3  "a23"
     parseTest test3  "a234"
+    parseTest test4  "a"
+    parseTest test4  "1"
+    parseTest test4  "!"        -- NG

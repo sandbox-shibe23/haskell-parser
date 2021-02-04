@@ -30,7 +30,9 @@ letter = satisfy isLetter <|> left "not letter"
 test1 = sequence [anyChar, anyChar]
 test2 = (++) <$> test1 <*> sequence [anyChar]
 test3 = sequence [letter, digit, digit]
-test4 = letter <|> digit 
+test4 = letter <|> digit
+test5 = sequence [letter, digit, digit, digit]
+test6 = sequence $ letter : replicate 3 digit
 
 main = do
     parseTest anyChar "abc"
@@ -51,3 +53,7 @@ main = do
     parseTest test4  "a"
     parseTest test4  "1"
     parseTest test4  "!"        -- NG
+    parseTest test5  "a123"
+    parseTest test5  "aa23"     -- NG
+    parseTest test6  "a123"
+    parseTest test6  "aa23"     -- NG

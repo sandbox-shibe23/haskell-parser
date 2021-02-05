@@ -27,12 +27,16 @@ char c = satisfy (== c)   <|> left ("not char" ++ show c)
 digit  = satisfy isDigit  <|> left "not digit"
 letter = satisfy isLetter <|> left "not letter"
 
+many p = ((:) <$> p <*> many p) <|> return [] 
+
 test1 = sequence [anyChar, anyChar]
 test2 = (++) <$> test1 <*> sequence [anyChar]
 test3 = sequence [letter, digit, digit]
 test4 = letter <|> digit
 test5 = sequence [letter, digit, digit, digit]
 test6 = sequence $ letter : replicate 3 digit
+test7 = many letter
+test8 = many (letter <|> digit)
 
 main = do
     parseTest anyChar "abc"
@@ -57,3 +61,7 @@ main = do
     parseTest test5  "aa23"     -- NG
     parseTest test6  "a123"
     parseTest test6  "aa23"     -- NG
+    parseTest test7 "abc123"
+    parseTest test7 "123abc"
+    parseTest test8 "abc123"
+    parseTest test8 "123abc"

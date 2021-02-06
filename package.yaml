@@ -36,6 +36,7 @@ executables:
     dependencies:
     - haskell-parser
     - mtl
+    - parsec
 
 tests:
   haskell-parser-test:

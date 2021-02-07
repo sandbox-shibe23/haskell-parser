@@ -4,24 +4,25 @@ import Control.Monad.State
 import Data.Char
 
 parseTest p s = case evalStateT p s of
-    Right r -> print r
-    Left  e -> putStrLn $ "[" ++ show s ++ "] " ++ e
+    Right r     -> print r
+    Left (e, _) -> putStrLn $ "[" ++ show s ++ "] " ++ e
 
 anyChar = StateT $ anyChar where
     anyChar (x:xs) = Right (x, xs)
-    anyChar _      = Left "too short"
+    anyChar    xs  = Left ("too short", xs)
 
 satisfy f = StateT $ satisfy where
-    satisfy (x:xs) | not $ f x = Left $ ": " ++ show x
+    satisfy (x:xs) | not $ f x = Left (": " ++ show x, x:xs)
     satisfy    xs              = runStateT anyChar xs
 
-(StateT a) <|> (StateT b) = StateT $ \s ->
-    (a s)  <|> (b s) where
-    Left a <|> Left b = Left $ b ++ a
-    Left _ <|> b      = b
-    a      <|> _      = a
+(StateT a) <|> (StateT b) = StateT f where
+    f s0 =   (a  s0) <|> (b  s0) where
+        Left (a, s1) <|> _ | s0 /= s1 = Left (     a, s1)
+        Left (a, _ ) <|> Left (b, s2) = Left (b ++ a, s2)
+        Left _       <|> b            = b
+        a            <|> _            = a
 
-left = lift . Left
+left e = StateT $ \s -> Left (e, s)
 
 char c = satisfy (== c)   <|> left ("not char " ++ show c)
 digit  = satisfy isDigit  <|> left "not digit"
@@ -29,11 +30,9 @@ letter = satisfy isLetter <|> left "not letter"
 
 many p = ((:) <$> p <*> many p) <|> return []
 
-test7 = many letter
-test8 = many (letter <|> digit)
+test9 = sequence [char 'a', char 'b']
+    <|> sequence [char 'a', char 'c']
 
 main = do
-    parseTest test7 "abc123"
-    parseTest test7 "123abc"
-    parseTest test8 "abc123"
-    parseTest test8 "123abc"
+    parseTest test9 "ab"
+    parseTest test9 "ac"

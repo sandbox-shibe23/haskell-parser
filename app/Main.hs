@@ -22,17 +22,34 @@ satisfy f = StateT $ satisfy where
         Left _       <|> b            = b
         a            <|> _            = a
 
+try (StateT p) = StateT $ \s -> case p s of
+  Left (e, _) -> Left (e, s)
+  r           -> r
+
 left e = StateT $ \s -> Left (e, s)
 
 char c = satisfy (== c)   <|> left ("not char " ++ show c)
 digit  = satisfy isDigit  <|> left "not digit"
 letter = satisfy isLetter <|> left "not letter"
 
+string s = sequence [char x | x <- s]
+
 many p = ((:) <$> p <*> many p) <|> return []
 
 test9 = sequence [char 'a', char 'b']
     <|> sequence [char 'a', char 'c']
 
+test10 = try (sequence [char 'a', char 'b'])
+         <|>  sequence [char 'a', char 'c']
+test11 =      string "ab"  <|> string "ac"
+test12 = try (string "ab") <|> string "ac"
+
 main = do
     parseTest test9 "ab"
     parseTest test9 "ac"
+    parseTest test10 "ab"
+    parseTest test10 "ac"
+    parseTest test11 "ab"
+    parseTest test11 "ac"
+    parseTest test12 "ab"
+    parseTest test12 "ac"

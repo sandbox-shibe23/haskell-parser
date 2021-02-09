@@ -1,6 +1,8 @@
 import Text.Parsec
 
-number = many1 digit
+number = do
+  x <-  many1 digit
+  return (read x :: Int)
 
 main = do
     parseTest number "123"

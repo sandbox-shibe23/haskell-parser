@@ -2,9 +2,10 @@ import Text.Parsec
 
 expr = do
   x <- number
-  char '+'
-  y <- number
-  return [x, y]
+  xs <- many $ do
+    char '+'
+    number
+  return $ x:xs
 
 number = do
   x <-  many1 digit
@@ -13,3 +14,5 @@ number = do
 main = do
     parseTest number "123"
     parseTest expr "1+2"
+    parseTest expr "123"
+    parseTest expr "1+2+3"

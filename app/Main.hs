@@ -5,7 +5,7 @@ expr = do
   xs <- many $ do
     char '+'
     number
-  return $ x:xs
+  return $ sum $ x:xs -- fold
 
 number = do
   x <-  many1 digit

@@ -5,6 +5,10 @@ expr = do
   xs <- many $ do
     char '+'
     number
+    <|> do
+      char '-'
+      y <- number
+      return $ -y
   return $ sum $ x:xs -- fold
 
 number = do
@@ -16,3 +20,5 @@ main = do
     parseTest expr "1+2"
     parseTest expr "123"
     parseTest expr "1+2+3"
+    parseTest expr "1-2-3"
+    parseTest expr "1-2+3"

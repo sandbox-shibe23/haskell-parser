@@ -2,14 +2,23 @@ import Text.Parsec
 
 expr = do
   x <- number
-  xs <- many $ do
+  fs <- many $ do
     char '+'
-    number
+    y <- number
+    return (+ y)
     <|> do
       char '-'
       y <- number
-      return $ -y
-  return $ sum $ x:xs -- fold
+      return $ subtract y
+    <|> do
+      char '*'
+      y <- number
+      return $ (* y)
+    <|> do
+      char '/'
+      y <- number
+      return $ (`div` y)
+  return $ foldl (\x f -> f x) x fs
 
 number = do
   x <-  many1 digit
@@ -22,3 +31,6 @@ main = do
     parseTest expr "1+2+3"
     parseTest expr "1-2-3"
     parseTest expr "1-2+3"
+    parseTest expr "2*3+4"           -- OK
+    parseTest expr "2+3*4"           -- NG
+    parseTest expr "100/10/2"        -- OK

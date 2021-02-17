@@ -1,19 +1,23 @@
 import Text.Parsec
 
 expr = do
-  x <- number
+  x <- term
   fs <- many $ do
-    char '+'
-    y <- number
-    return (+ y)
+      char '+'
+      y <- term
+      return (+ y)
     <|> do
       char '-'
-      y <- number
+      y <- term
       return $ subtract y
-    <|> do
-      char '*'
-      y <- number
-      return $ (* y)
+  return $ foldl (\x f -> f x) x fs
+
+term = do
+  x <- number
+  fs <- many $ do
+    char '*'
+    y <- number
+    return $ (* y)
     <|> do
       char '/'
       y <- number

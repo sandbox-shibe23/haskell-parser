@@ -28,6 +28,13 @@ number = do
   x <-  many1 digit
   return (read x :: Int)
 
+test1 = do
+    x <- letter
+    digit
+    return x
+
+test2 = letter <* digit
+
 main = do
     parseTest number "123"
     parseTest expr "1+2"
@@ -38,3 +45,5 @@ main = do
     parseTest expr "2*3+4"           -- OK
     parseTest expr "2+3*4"           -- NG
     parseTest expr "100/10/2"        -- OK
+    parseTest test1 "a1"
+    parseTest test2 "a1"

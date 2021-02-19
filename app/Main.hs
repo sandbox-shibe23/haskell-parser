@@ -1,39 +1,17 @@
 import Text.Parsec
 
-expr = do
-  x <- term
-  fs <- many $ do
-      char '+'
-      y <- term
-      return (+ y)
-    <|> do
-      char '-'
-      y <- term
-      return $ subtract y
-  return $ foldl (\x f -> f x) x fs
+eval m fs = foldl (\x f -> f x) <$> m <*> fs
+apply f m = flip f <$> m
 
-term = do
-  x <- number
-  fs <- many $ do
-    char '*'
-    y <- number
-    return $ (* y)
-    <|> do
-      char '/'
-      y <- number
-      return $ (`div` y)
-  return $ foldl (\x f -> f x) x fs
+expr = eval term $ many $
+      char '+' *> apply (+) term
+  <|> char '-' *> apply (-) term
 
-number = do
-  x <-  many1 digit
-  return (read x :: Int)
+term = eval number $ many $
+      char '*' *> apply (*) term
+  <|> char '/' *> apply div term
 
-test1 = do
-    x <- letter
-    digit
-    return x
-
-test2 = letter <* digit
+number = read <$> many1 digit
 
 main = do
     parseTest number "123"
@@ -45,5 +23,3 @@ main = do
     parseTest expr "2*3+4"           -- OK
     parseTest expr "2+3*4"           -- NG
     parseTest expr "100/10/2"        -- OK
-    parseTest test1 "a1"
-    parseTest test2 "a1"
